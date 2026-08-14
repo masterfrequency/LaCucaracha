@@ -1,0 +1,15 @@
+{
+  "bot_token": "",
+  "c2_host": "127.0.0.1:10002",
+  "admin_ids": [0],
+  "chat_ids": [0],
+  "chat_id": 0,
+  "alert_channels": {
+    "exploits": true,
+    "deployments": true,
+    "errors": true,
+    "nodes": true,
+    "reports": true
+  },
+  "report_interval": 300
+}

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Runtime state — never commit
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+logs/
+data/
+targets/
+intel/
+results/
+*.log
+
+# Secrets — real config, never commit
+telegram_config.json
+.env
+.env.*
+!.env.example
+
+# Compiled exploit binaries (build from source)
+exploits/dirtyfrag
+exploits/copy_fail
+exploits/heel.bin
+exploits/heel.latest
+exploits/heel/target/
+exploits/heel/Cargo.lock
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
