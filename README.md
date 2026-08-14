@@ -4,6 +4,10 @@
 
 > ⚡️👾 Single-file Python 3 worm. 15,823 lines. 469 functions. 26 core classes. It survives.
 
+<p align="center">
+  <img src="assets/banner.jpg" alt="La Cucaracha" width="420">
+</p>
+
 ---
 
 ## 📦 What It Is
