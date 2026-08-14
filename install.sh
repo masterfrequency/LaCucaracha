@@ -22,13 +22,17 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# --- copy source ---
+# --- obtain source ---
 mkdir -p "$INSTALL_DIR"
 if [[ -d "./.git" ]]; then
-    # running from a clone
+    # running from a clone — copy it
     cp -a . "$INSTALL_DIR"/
+elif command -v git >/dev/null 2>&1; then
+    # piped via curl — clone the repo
+    echo "  Cloning LaCucaracha into $INSTALL_DIR ..."
+    git clone --depth 1 https://github.com/masterfrequency/LaCucaracha.git "$INSTALL_DIR"
 else
-    echo "✗ Run this from a clone of the repo (or INSTALL_DIR is auto-copied from cwd)." >&2
+    echo "✗ git not found and no clone present." >&2
     exit 1
 fi
 cd "$INSTALL_DIR"
